@@ -13,7 +13,7 @@ load_dotenv()
 # Spotify API credentials
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = "http://127.0.0.1:3344/callback"
+REDIRECT_URI = "http://127.0.0.1:3344/callback"  # Update for production
 
 # Spotify API endpoints
 AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -25,14 +25,17 @@ MQTT_BROKER = "mqtt.home.koko"
 TOPIC_PRESENCE_KITCHEN = "PRESENCE-kitchen"
 TOPIC_PRESENCE2 = "presence2/binary_sensor/presence/state"
 
-# Initialize Flask app
-app = Flask(__name__)
-
-# Global variables to store tokens and expiration time
+# Global variables
 access_token = None
 refresh_token = None
 token_expires_at = 0
-current_device = None  # Track current playback device
+current_device = None
+mqtt_client = None
+mqtt_thread = None
+
+# Function definitions (refresh_access_token, is_token_expired, is_playing, change_playback_device)
+# [Keep your existing function definitions here]
+
 
 # Function to refresh the access token
 def refresh_access_token():
@@ -125,6 +128,7 @@ def change_playback_device(device_name):
     else:
         print(f"Failed to fetch devices. Status: {devices_response.status_code}")
 
+
 # MQTT Callbacks
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -152,17 +156,22 @@ def on_message(client, userdata, msg):
 
 # Start MQTT in a separate thread
 def start_mqtt():
-    client = mqtt.Client()
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(MQTT_BROKER, 1883, 60)
-    client.loop_forever()
+    global mqtt_client
+    
+    mqtt_client = mqtt.Client()
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    
+    try:
+        mqtt_client.connect(MQTT_BROKER, 1883, 60)
+        mqtt_client.loop_forever()
+    except Exception as e:
+        print(f"MQTT connection error: {e}")
 
-# Start MQTT thread
-mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
-mqtt_thread.start()
+# Initialize Flask app
+app = Flask(__name__)
 
-# Flask Routes
+# Configure Flask routes
 @app.route("/")
 def index():
     scope = "playlist-read-private user-read-playback-state user-modify-playback-state"
@@ -203,5 +212,17 @@ def callback():
         else:
             return "Failed to retrieve access token."
 
+# Function to start MQTT thread
+def start_mqtt_thread():
+    global mqtt_thread
+    if mqtt_thread is None or not mqtt_thread.is_alive():
+        mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
+        mqtt_thread.start()
+        print("MQTT thread started")
+
+# Initialize MQTT thread when this module is imported
+start_mqtt_thread()
+
+# For direct execution (not via Gunicorn)
 if __name__ == "__main__":
     app.run(port=3344, debug=True)
