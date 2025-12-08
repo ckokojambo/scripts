@@ -1,0 +1,15 @@
+sudo apt update
+sudo apt full-upgrade -y
+sudo apt install ufw micro git -y
+
+cd sshd_config.d/
+micro 50-cloud-init.conf 
+
+sudo systemctl restart sshd
+sudo systemctl restart ssh
+
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw default deny routed
+sudo ufw allow from [IP] proto tcp to any port 22
+sudo ufw enable
