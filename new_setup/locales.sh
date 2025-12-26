@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo locale-gen de_DE.UTF-8
+sudo apt update && sudo apt install -y locales && sudo locale-gen de_DE.UTF-8
 
 sudo update-locale \
   LC_TIME=de_DE.UTF-8 \
