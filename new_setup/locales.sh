@@ -14,4 +14,6 @@ sudo update-locale \
 
   sudo timedatectl set-timezone Europe/Berlin
 
+  timedatectl
+
   
