@@ -1,0 +1,11 @@
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin prometheus
+cd ~/Downloads/prometheus-3.5.0.linux-amd64
+sudo install -m 0755 prometheus promtool /usr/local/bin/
+sudo mkdir -p /etc/prometheus 
+sudo mkdir -p /var/lib/prometheus
+sudo chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
+sudo chmod 0755 /etc/prometheus /var/lib/prometheus
+sudo chown prometheus:prometheus /etc/prometheus/prometheus.yml
+sudo chmod 0644 /etc/prometheus/prometheus.yml
+sudo systemctl daemon-reload
+sudo systemctl enable --now prometheus

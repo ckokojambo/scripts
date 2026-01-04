@@ -1,0 +1,30 @@
+[Unit]
+Description=Prometheus Blackbox Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=blackbox_exporter
+Group=blackbox_exporter
+Type=simple
+ExecStart=/usr/local/bin/blackbox_exporter \
+  --config.file=/etc/blackbox_exporter/blackbox.yml \
+  --web.listen-address=:9115
+Restart=on-failure
+RestartSec=2
+
+# Hardening (optional but recommended)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+ReadWritePaths=/var/lib/blackbox_exporter
+
+[Install]
+WantedBy=multi-user.target

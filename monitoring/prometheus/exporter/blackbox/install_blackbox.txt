@@ -1,0 +1,7 @@
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin blackbox_exporter
+sudo install -m 0755 blackbox_exporter /usr/local/bin/blackbox_exporter
+sudo mkdir -p /etc/blackbox_exporter
+sudo mkdir -p /var/lib/blackbox_exporter
+sudo chown -R blackbox_exporter:blackbox_exporter /var/lib/blackbox_exporter
+sudo systemctl daemon-reload
+sudo systemctl enable --now blackbox_exporter
