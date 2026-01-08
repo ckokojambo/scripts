@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  sonoff-dongle-flasher:
+    image: ewelink/sonoff-dongle-flasher:latest
+    container_name: sonoff-dongle-flasher
+    ports:
+      - "8324:8324"            # Web console
+    privileged: true
+    volumes:
+      - sonoff_data:/workspace/data  # Persistent config/firmware
+      - /run/udev:/run/udev:ro       # Auto-discovery
+    restart: unless-stopped
+
+volumes:
+  sonoff_data:
